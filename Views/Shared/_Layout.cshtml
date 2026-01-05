@@ -1,0 +1,148 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using vinted2.Models
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    ApplicationUser? user = null;
+    string role = "User";
+    if (User.Identity.IsAuthenticated)
+    {
+        user = await UserManager.GetUserAsync(User);
+        if (user != null)
+        {
+            var roles = await UserManager.GetRolesAsync(user);
+            role = roles.FirstOrDefault() ?? "User";
+        }
+    }
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - vinted2</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/vinted2.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/images/logo/logo.png" alt="VintedClone Logo" class="navbar-logo" />
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link category-link" asp-controller="Products" asp-action="Index">NEWEST</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link category-link" asp-controller="Products" asp-action="Index" asp-route-category="footwear">FOOTWEAR</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link category-link" asp-controller="Products" asp-action="Index" asp-route-category="clothing">CLOTHING</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link category-link" asp-controller="Products" asp-action="Index" asp-route-category="accessories">ACCESSORIES</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link category-link" asp-controller="Products" asp-action="Index" asp-route-category="sport">SPORT</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link category-link" asp-controller="Products" asp-action="Index" asp-route-category="brands">BRANDS</a>
+                        </li>
+                        @if (User.Identity.IsAuthenticated)
+{
+    <li class="nav-item">
+        <a class="nav-link" asp-controller="Favorites" asp-action="Index">
+            <i class="fas fa-heart"></i> Favorites
+        </a>
+    </li>
+}
+                    </ul>
+                    
+                    @if (user != null && role == "Admin")
+                    {
+                        <div class="admin-section ms-3">
+                            <a class="btn btn-warning btn-sm admin-btn" asp-controller="Categories" asp-action="Index">
+                                <i class="fas fa-cog"></i> Manage Categories
+                            </a>
+                        </div>
+                    }
+
+                    <ul class="navbar-nav ms-auto align-items-center">
+
+                        @if (user != null)
+                        {
+                            <li class="nav-item d-flex align-items-center me-2">
+                                <span class="badge me-2 @(role == "Admin" ? "bg-danger" : "bg-primary")">
+                                    @role
+                                </span>
+
+                                <img id="navbarAvatar"
+                                     src="@(string.IsNullOrEmpty(user.AvatarPath) ? "/images/profiles/default-avatar.png" : user.AvatarPath)"
+                                     class="rounded-circle me-2"
+                                     style="width:35px; height:35px; object-fit:cover;" />
+
+                                <a class="nav-link p-0 fw-semibold" asp-controller="Profile" asp-action="Index">
+                                    Hello, @user.DisplayName
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <form method="post" asp-area="Identity" asp-page="/Account/Logout" class="d-inline">
+                                    <button type="submit" class="nav-link btn btn-link text-danger p-0 ms-2"
+                                            style="border:none; background:none;">
+                                        Logout
+                                    </button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="Identity" asp-page="/Account/Login">Login</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="Identity" asp-page="/Account/Register">Register</a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            window.addEventListener("profileAvatarUpdated", function (e) {
+                const newAvatarPath = e.detail.newPath;
+                const navbarAvatar = document.getElementById("navbarAvatar");
+                if (navbarAvatar) {
+                    navbarAvatar.src = newAvatarPath + "?t=" + new Date().getTime();
+                }
+            });
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

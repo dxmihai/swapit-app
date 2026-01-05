@@ -1,0 +1,195 @@
+﻿@model IEnumerable<vinted2.Models.Favorite>
+
+@{
+    ViewData["Title"] = "My Favorites";
+}
+
+<div class="favorites-page">
+    <div class="container py-5">
+        <!-- Header Section -->
+        <div class="favorites-header mb-5">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="display-5 fw-bold mb-2">
+                        <i class="fas fa-heart text-danger me-2"></i>
+                        My Favorites
+                    </h1>
+                    <p class="text-muted">Your collection of favorite items</p>
+                </div>
+                <div class="favorites-count">
+                    <span class="badge bg-gradient-primary">
+                        <i class="fas fa-heart me-2"></i>
+                        @Model.Count() @(Model.Count() == 1 ? "item" : "items")
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <!-- Empty State -->
+            <div class="empty-favorites text-center py-5">
+                <div class="empty-icon mb-4">
+                    <i class="fas fa-heart-broken"></i>
+                </div>
+                <h3 class="mb-3">No favorites yet</h3>
+                <p class="text-muted mb-4">Start exploring and add products to your favorites!</p>
+                <a asp-controller="Products" asp-action="Index" class="btn btn-primary btn-lg">
+                    <i class="fas fa-shopping-bag me-2"></i>
+                    Browse Products
+                </a>
+            </div>
+        }
+        else
+        {
+            <!-- Products Grid -->
+            <div class="row g-4">
+                @foreach (var favorite in Model)
+                {
+                    var product = favorite.Product;
+                    if (product == null) continue;
+
+                    var imageUrl = product.Images?.FirstOrDefault()?.ImagePath
+                    ?? product.ImagePath
+                    ?? "/images/no-image.png";
+
+                    <div>
+                        <div class="favorite-card">
+                            <!-- Product Image -->
+                            <div class="favorite-image-wrapper">
+                                <a asp-controller="Products" asp-action="Details" asp-route-id="@product.Id">
+                                    <img src="@imageUrl"
+                                         alt="@product.Title"
+                                         class="favorite-image">
+                                    <div class="image-overlay">
+                                        <span class="view-details">View Details</span>
+                                    </div>
+                                </a>
+
+                                <!-- Remove Button -->
+                                <button class="btn-remove-favorite"
+                                        onclick="removeFavorite(@product.Id, this)"
+                                        title="Remove from favorites">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                            </div>
+
+                            <!-- Product Info -->
+                            <div class="favorite-info">
+                                <a asp-controller="Products" asp-action="Details" asp-route-id="@product.Id"
+                                   class="product-link">
+                                    <h5 class="product-title">@product.Title</h5>
+                                </a>
+
+                                <div class="product-meta">
+                                    @if (product.Category != null)
+                                    {
+                                        <span class="category-badge">
+                                            <i class="fas fa-tag me-1"></i>
+                                            @product.Category.Name
+                                        </span>
+                                    }
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <span class="product-price">@product.Price.ToString("F2") $</span>
+                                    <a asp-controller="Products" asp-action="Details" asp-route-id="@product.Id"
+                                       class="btn btn-sm btn-outline-primary">
+                                        View
+                                    </a>
+                                </div>
+
+                                <div class="favorite-date">
+                                    <i class="far fa-clock me-1"></i>
+                                    Added @favorite.CreatedAt.ToString("MMM dd, yyyy")
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        async function removeFavorite(productId, button) {
+            if (!confirm('Remove this item from your favorites?')) {
+                return;
+            }
+
+            button.disabled = true;
+
+            try {
+                const response = await fetch('/Favorites/Remove', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ productId: productId })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const card = button.closest('.row > div');
+                    card.style.transition = 'all 0.4s ease';
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.8)';
+
+                    setTimeout(() => {
+                        card.remove();
+
+                        const remainingCards = document.querySelectorAll('.favorite-card').length;
+                        if (remainingCards === 0) {
+                            location.reload();
+                        } else {
+                            const badge = document.querySelector('.favorites-count .badge');
+                            if (badge) {
+                                const itemText = remainingCards === 1 ? 'item' : 'items';
+                                badge.innerHTML = `<i class="fas fa-heart me-2"></i>${remainingCards} ${itemText}`;
+                            }
+                        }
+                    }, 400);
+
+                    showNotification('Removed from favorites!', 'success');
+                } else {
+                    button.disabled = false;
+                    showNotification(data.message || 'Failed to remove', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                button.disabled = false;
+                showNotification('An error occurred. Please try again.', 'error');
+            }
+        }
+
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'success' ? 'success' : 'danger'} notification-toast`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+                ${message}
+            `;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                min-width: 300px;
+                padding: 1rem 1.5rem;
+                border-radius: 10px;
+                box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+                animation: slideIn 0.4s ease;
+            `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+    </script>
+}

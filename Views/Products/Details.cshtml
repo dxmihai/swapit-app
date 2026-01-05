@@ -1,0 +1,460 @@
+﻿@model vinted2.Models.Product
+@using Microsoft.AspNetCore.Identity
+@using vinted2.Models
+@inject UserManager<ApplicationUser> UserManager
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+@{
+    ViewData["Title"] = Model.Title;
+
+    ApplicationUser? currentUser = null;
+    bool isAdmin = false;
+    if (User.Identity?.IsAuthenticated == true)
+    {
+        currentUser = await UserManager.GetUserAsync(User);
+        if (currentUser != null)
+        {
+            var roles = await UserManager.GetRolesAsync(currentUser);
+            isAdmin = roles?.Contains("Admin") ?? false;
+        }
+    }
+
+    bool canEdit = currentUser != null && Model.UserId == currentUser.Id;
+
+    var productImages = Model.Images?.Any() == true
+        ? Model.Images.Select(i => i.ImagePath).ToList()
+        : (!string.IsNullOrEmpty(Model.ImagePath)
+            ? new List<string> { Model.ImagePath }
+            : new List<string>());
+}
+
+<div class="product-details-page">
+    <div class="container py-4">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a asp-action="Index"><i class="fas fa-home"></i> Home</a></li>
+                <li class="breadcrumb-item"><a asp-action="Index">Products</a></li>
+                <li class="breadcrumb-item active" aria-current="page">@Model.Title</li>
+            </ol>
+        </nav>
+
+        <div class="row">
+            <div class="col-lg-7 mb-4">
+                <div class="product-gallery text-center position-relative">
+                    @if (productImages.Any())
+                    {
+                        <div class="gallery-wrapper position-relative">
+                            <div class="main-image-container position-relative">
+                                @for (int i = 0; i < productImages.Count; i++)
+                                {
+                                    <img src="@productImages[i]"
+                                         alt="@Model.Title - Image @(i + 1)"
+                                         class="gallery-image @(i == 0 ? "active" : "d-none")"
+                                         data-index="@i" />
+                                }
+
+                                @if (productImages.Count > 1)
+                                {
+                                    <button type="button" class="gallery-nav gallery-prev"
+                                            onclick="changeImage(-1)">
+                                        <i class="bi bi-chevron-left"></i>
+                                    </button>
+                                    <button type="button" class="gallery-nav gallery-next"
+                                            onclick="changeImage(1)">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </button>
+
+                                    <div class="image-counter">
+                                        <span id="currentImageIndex">1</span> / <span>@productImages.Count</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="main-image-container text-center">
+                            <div class="no-image-placeholder">
+                                <i class="fas fa-tshirt fa-3x mb-2"></i>
+                                <p>No image available</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="product-details-info">
+                    <div class="product-price-section">
+                        <h1 class="product-price-large">@Model.Price.ToString("F2") $</h1>
+                        <div class="product-actions-top">
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <button class="btn-icon btn-favorite-details"
+                                        id="favoriteBtn"
+                                        data-product-id="@Model.Id"
+                                        onclick="toggleFavorite()"
+                                        title="Add to Favorites">
+                                    <i class="far fa-heart" id="favoriteIcon"></i>
+                                </button>
+                            }
+                            else
+                            {
+                                <a asp-area="Identity" asp-page="/Account/Login"
+                                   class="btn-icon btn-favorite-details"
+                                   title="Login to add to favorites">
+                                    <i class="far fa-heart"></i>
+                                </a>
+                            }
+                            <button class="btn-icon btn-share-details" title="Share">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <h2 class="product-title-large">@Model.Title</h2>
+
+                    <div class="product-meta-info">
+                        <div class="meta-item"><i class="fas fa-tag"></i><span>@Model.Category?.Name</span></div>
+                        <div class="meta-item"><i class="fas fa-calendar-alt"></i><span>Listed @Model.CreatedAt.ToString("MMMM dd, yyyy")</span></div>
+                        <div class="meta-item"><i class="fas fa-eye"></i><span>@(new Random().Next(50, 500)) views</span></div>
+                    </div>
+
+                    <div class="seller-section">
+                        <h5 class="section-title">Seller</h5>
+                        <div class="seller-card">
+                            @if (!string.IsNullOrEmpty(Model.User?.AvatarPath))
+                            {
+                                <img src="@Model.User.AvatarPath"
+                                     alt="@Model.User.UserName"
+                                     class="seller-avatar-img" />
+                            }
+                            else
+                            {
+                                <div class="seller-avatar-placeholder">
+                                    <i class="fas fa-user-circle"></i>
+                                </div>
+                            }
+                            <div class="seller-info">
+                                <h6 class="seller-name">@(Model.User?.UserName ?? "Unknown")</h6>
+                                <div class="seller-rating">
+                                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                                    <span>(4.5)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="description-section">
+                        <h5 class="section-title">Description</h5>
+                        <p class="product-description-text">@Model.Description</p>
+                    </div>
+
+                    <div class="action-buttons-section">
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            @if (!canEdit)
+                            {
+                                <a asp-controller="Orders"
+                                   asp-action="Checkout"
+                                   asp-route-productId="@Model.Id"
+                                   class="btn btn-primary btn-lg btn-block mb-2">
+                                    <i class="fas fa-shopping-bag"></i> Buy Now
+                                </a>
+
+                                <button class="btn btn-outline-primary btn-lg btn-block">
+                                    <i class="fas fa-comment"></i> Message Seller
+                                </button>
+                            }
+                        }
+                        else
+                        {
+                            <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-primary btn-lg btn-block mb-2">
+                                <i class="fas fa-sign-in-alt"></i> Login to Buy
+                            </a>
+                        }
+                    </div>
+
+                    @if (canEdit)
+                    {
+                        <div class="owner-actions-section">
+                            <hr />
+                            <h5 class="section-title">Manage Listing</h5>
+                            <div class="d-flex gap-2">
+                                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning flex-fill">
+                                    <i class="fas fa-edit"></i> Edit Product
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger flex-fill">
+                                    <i class="fas fa-trash"></i> Delete
+                                </a>
+                            </div>
+                        </div>
+                    }
+
+                    <div class="back-button-section mt-3">
+                        <a asp-action="Index" class="btn btn-outline-secondary btn-block">
+                            <i class="fas fa-arrow-left"></i> Back to Products
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Favorite Button Styling */
+    .btn-icon {
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 50%;
+        width: 45px;
+        height: 45px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 20px;
+        color: #666;
+        text-decoration: none;
+    }
+
+        .btn-icon:hover {
+            border-color: #dc3545;
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+
+    .btn-favorite-details.active {
+        border-color: #dc3545;
+        background: #fff5f5;
+    }
+
+        .btn-favorite-details.active i {
+            color: #dc3545;
+        }
+
+            .btn-favorite-details.active i::before {
+                content: "\f004"; /* solid heart icon */
+                font-weight: 900;
+            }
+
+    /* Pulse animation on favorite */
+    @@keyframes heartBeat {
+        0%, 100% {
+            transform: scale(1);
+        }
+
+        25% {
+            transform: scale(1.3);
+        }
+
+        50% {
+            transform: scale(1.1);
+        }
+
+        75% {
+            transform: scale(1.2);
+        }
+    }
+
+    .btn-favorite-details.pulse {
+        animation: heartBeat 0.5s ease;
+    }
+
+    /* Notification Toast Styling */
+    .notification-toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 280px;
+        padding: 16px 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 500;
+    }
+
+        .notification-toast i {
+            font-size: 20px;
+        }
+
+    @@keyframes slideInRight {
+        from {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @@keyframes slideOutRight {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        to {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+    }
+
+    .notification-toast.show {
+        animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    .notification-toast.hide {
+        animation: slideOutRight 0.3s ease;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Gallery functionality
+        let currentIndex = 0;
+        const images = document.querySelectorAll('.gallery-image');
+        const total = images.length;
+        const counter = document.getElementById('currentImageIndex');
+
+        function showImage(index) {
+            images.forEach((img, i) => img.classList.toggle('d-none', i !== index));
+            if (counter) counter.textContent = index + 1;
+        }
+
+        window.changeImage = function (direction) {
+            if (total < 2) return;
+            currentIndex = (currentIndex + direction + total) % total;
+            showImage(currentIndex);
+        };
+
+        if (images.length > 0) {
+            showImage(currentIndex);
+        }
+
+        // Check favorite status on page load
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+                <text>
+                const productId = @Model.Id;
+                checkFavoriteStatus(productId);
+                </text>
+        }
+    });
+
+    // Check if product is already in favorites
+    async function checkFavoriteStatus(productId) {
+        try {
+            const response = await fetch(`/Favorites/Check?productId=${productId}`);
+            const data = await response.json();
+
+            const btn = document.getElementById('favoriteBtn');
+            const icon = document.getElementById('favoriteIcon');
+
+            if (btn && icon) {
+                if (data.isFavorite) {
+                    btn.classList.add('active');
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                    btn.title = 'Remove from favorites';
+                } else {
+                    btn.classList.remove('active');
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                    btn.title = 'Add to favorites';
+                }
+            }
+        } catch (error) {
+            console.error('Error checking favorite status:', error);
+        }
+    }
+
+    // Toggle favorite status
+    async function toggleFavorite() {
+        const btn = document.getElementById('favoriteBtn');
+        const icon = document.getElementById('favoriteIcon');
+        const productId = btn.dataset.productId;
+
+        // Disable button during request
+        btn.disabled = true;
+
+        try {
+            const response = await fetch('/Favorites/Toggle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ productId: parseInt(productId) })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Add pulse animation
+                btn.classList.add('pulse');
+                setTimeout(() => btn.classList.remove('pulse'), 500);
+
+                if (data.isFavorite) {
+                    // Added to favorites
+                    btn.classList.add('active');
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                    btn.title = 'Remove from favorites';
+                    showNotification('Added to favorites! ❤️', 'success');
+                } else {
+                    // Removed from favorites
+                    btn.classList.remove('active');
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                    btn.title = 'Add to favorites';
+                    showNotification('Removed from favorites', 'info');
+                }
+            } else {
+                showNotification(data.message || 'An error occurred', 'error');
+            }
+        } catch (error) {
+            console.error('Error toggling favorite:', error);
+            showNotification('An error occurred. Please try again.', 'error');
+        } finally {
+            // Re-enable button
+            btn.disabled = false;
+        }
+    }
+
+    // Show notification toast
+    function showNotification(message, type) {
+        // Remove any existing notifications
+        const existing = document.querySelector('.notification-toast');
+        if (existing) {
+            existing.remove();
+        }
+
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} notification-toast show`;
+
+        const iconClass = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle';
+
+        notification.innerHTML = `
+            <i class="fas fa-${iconClass}"></i>
+            <span>${message}</span>
+        `;
+
+        document.body.appendChild(notification);
+
+        // Remove after 3.5 seconds
+        setTimeout(() => {
+            notification.classList.remove('show');
+            notification.classList.add('hide');
+            setTimeout(() => notification.remove(), 300);
+        }, 3500);
+    }
+</script>

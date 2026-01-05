@@ -1,0 +1,149 @@
+@model IEnumerable<vinted2.Models.Order>
+@{
+    ViewData["Title"] = "Manage Orders";
+}
+
+<div class="container py-5">
+    <h2 class="mb-4 text-center">Manage Orders</h2>
+    <p class="text-muted text-center mb-4">Orders you have received for your products</p>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info text-center">You have no orders to manage yet.</div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var order in Model)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card shadow-sm h-100">
+                        @if (order.Product != null)
+                        {
+                            <!-- Product Image -->
+                            <img src="@(order.Product.Images?.FirstOrDefault()?.ImagePath
+                                             ?? order.Product.ImagePath
+                                             ?? "/images/default-product.png")"
+                                 class="card-img-top"
+                                 alt="@order.Product.Title"
+                                 style="height: 200px; object-fit: cover;">
+                        }
+                        else
+                        {
+                            <!-- Product deleted placeholder -->
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <div class="text-center text-muted">
+                                    <i class="fas fa-box-open fa-3x mb-2"></i>
+                                    <p class="mb-0">Product No Longer Available</p>
+                                </div>
+                            </div>
+                        }
+
+                        <div class="card-body d-flex flex-column">
+                            <!-- Buyer Info -->
+                            <div class="d-flex align-items-center mb-3">
+                                <img src="@(order.User?.AvatarPath ?? "/images/profiles/default-avatar.png")"
+                                     alt="@(order.User?.DisplayName ?? order.User?.UserName ?? "Unknown")"
+                                     class="rounded-circle me-2"
+                                     style="width:40px; height:40px; object-fit:cover;">
+                                <div>
+                                    <strong>@(order.User?.DisplayName ?? order.User?.UserName ?? "Unknown User")</strong>
+                                    <br>
+                                    <small class="text-muted">Buyer</small>
+                                </div>
+                            </div>
+
+                            @if (order.Product != null)
+                            {
+                                <h5 class="card-title">@order.Product.Title</h5>
+                            }
+                            else
+                            {
+                                <h5 class="card-title text-muted">Product Deleted</h5>
+                            }
+                            
+                            <p class="card-text mb-1">
+                                <strong>Price:</strong> @order.Price.ToString("C")
+                            </p>
+                            <p class="card-text mb-1">
+                                <strong>Status:</strong> 
+                                <span class="badge 
+                                    @(order.Status == vinted2.Models.OrderStatus.Pending ? "bg-warning" :
+                                      order.Status == vinted2.Models.OrderStatus.InTransit ? "bg-info" :
+                                      order.Status == vinted2.Models.OrderStatus.Completed ? "bg-success" :
+                                      "bg-danger")">
+                                    @order.Status
+                                </span>
+                            </p>
+                            <p class="card-text mb-1">
+                                <strong>Delivery:</strong> @order.DeliveryMethod
+                            </p>
+                            <p class="card-text mb-1">
+                                <strong>Address:</strong> @order.Address, @order.City
+                            </p>
+                            <p class="card-text mb-1">
+                                <strong>Phone:</strong> @order.Phone
+                            </p>
+                            <p class="card-text text-muted">
+                                <small>Ordered at: @order.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                            </p>
+
+                            <!-- Action Buttons -->
+                            <div class="mt-auto pt-3">
+                                @if (order.Status == vinted2.Models.OrderStatus.Pending)
+                                {
+                                    <form asp-action="MarkAsSent" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@order.Id" />
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-success btn-sm w-100 mb-2">
+                                            <i class="fas fa-paper-plane"></i> Mark as Sent
+                                        </button>
+                                    </form>
+                                    <form asp-action="CancelOrder" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@order.Id" />
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-danger btn-sm w-100 mb-2" 
+                                                onclick="return confirm('Are you sure you want to cancel this order?');">
+                                            <i class="fas fa-times"></i> Cancel Order
+                                        </button>
+                                    </form>
+                                    <a href="@Url.Action("Details", "Orders", new { id = order.Id })" class="btn btn-primary btn-sm w-100">
+                                        <i class="fas fa-info-circle"></i> View Details
+                                    </a>
+                                }
+                                else if (order.Status == vinted2.Models.OrderStatus.InTransit)
+                                {
+                                    <div class="alert alert-info mb-2">
+                                        <small>Order is in transit. Waiting for buyer confirmation.</small>
+                                    </div>
+                                    <a href="@Url.Action("Details", "Orders", new { id = order.Id })" class="btn btn-primary btn-sm w-100">
+                                        <i class="fas fa-info-circle"></i> View Details
+                                    </a>
+                                }
+                                else if (order.Status == vinted2.Models.OrderStatus.Completed)
+                                {
+                                    <div class="alert alert-success mb-2">
+                                        <small><i class="fas fa-check-circle"></i> Order completed</small>
+                                    </div>
+                                    <a href="@Url.Action("Details", "Orders", new { id = order.Id })" class="btn btn-primary btn-sm w-100">
+                                        <i class="fas fa-info-circle"></i> View Details
+                                    </a>
+                                }
+                                else if (order.Status == vinted2.Models.OrderStatus.Canceled)
+                                {
+                                    <div class="alert alert-danger mb-2">
+                                        <small><i class="fas fa-ban"></i> Order canceled</small>
+                                    </div>
+                                    <a href="@Url.Action("Details", "Orders", new { id = order.Id })" class="btn btn-primary btn-sm w-100">
+                                        <i class="fas fa-info-circle"></i> View Details
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+

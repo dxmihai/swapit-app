@@ -1,0 +1,251 @@
+﻿@model IEnumerable<vinted2.Models.Product>
+@using Microsoft.AspNetCore.Identity
+@using vinted2.Models
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    ViewData["Title"] = ViewData["Title"] ?? "All Products";
+    var currentCategory = ViewData["CurrentCategory"] as string;
+
+    ApplicationUser? currentUser = null;
+    bool isAdmin = false;
+    if (User.Identity?.IsAuthenticated == true)
+    {
+        currentUser = await UserManager.GetUserAsync(User);
+        if (currentUser != null)
+        {
+            var roles = await UserManager.GetRolesAsync(currentUser);
+            isAdmin = roles?.Contains("Admin") ?? false;
+        }
+    }
+}
+
+<div class="products-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="page-title">
+                    <i class="fas fa-tshirt"></i> @ViewData["Title"]
+                </h1>
+                <p class="page-subtitle">
+                    @if (string.IsNullOrEmpty(currentCategory))
+                    {
+                        <text>Discover amazing pre-loved fashion items</text>
+                    }
+                    else
+                    {
+                        <text>Browse @currentCategory.ToLower() items</text>
+                    }
+                </p>
+            </div>
+            <div class="col-md-4 text-end">
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <a asp-action="Create" class="btn btn-primary btn-lg">
+                        <i class="fas fa-plus"></i> Sell Your Item
+                    </a>
+                }
+                else
+                {
+                    <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-primary btn-lg">
+                        <i class="fas fa-sign-in-alt"></i> Login to Sell
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="filters-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="filters-bar">
+                    <div class="filter-group">
+                        <label class="filter-label">Category:</label>
+                        <form method="get" asp-controller="Products" asp-action="Index" class="d-inline">
+                            <select name="category" class="form-select filter-select" onchange="this.form.submit()">
+                                @if (string.IsNullOrEmpty(currentCategory))
+                                {
+                                    <option value="" selected>All Categories</option>
+                                }
+                                else
+                                {
+                                    <option value="">All Categories</option>
+                                }
+
+                                @if (currentCategory == "footwear")
+                                {
+                                    <option value="footwear" selected>Footwear</option>
+                                }
+                                else
+                                {
+                                    <option value="footwear">Footwear</option>
+                                }
+
+                                @if (currentCategory == "clothing")
+                                {
+                                    <option value="clothing" selected>Clothing</option>
+                                }
+                                else
+                                {
+                                    <option value="clothing">Clothing</option>
+                                }
+
+                                @if (currentCategory == "accessories")
+                                {
+                                    <option value="accessories" selected>Accessories</option>
+                                }
+                                else
+                                {
+                                    <option value="accessories">Accessories</option>
+                                }
+
+                                @if (currentCategory == "sport")
+                                {
+                                    <option value="sport" selected>Sport</option>
+                                }
+                                else
+                                {
+                                    <option value="sport">Sport</option>
+                                }
+
+                                @if (currentCategory == "brands")
+                                {
+                                    <option value="brands" selected>Brands</option>
+                                }
+                                else
+                                {
+                                    <option value="brands">Brands</option>
+                                }
+                            </select>
+                        </form>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Price:</label>
+                        <select class="form-select filter-select">
+                            <option value="">Any Price</option>
+                            <option value="0-25">$0 - $25</option>
+                            <option value="25-50">$25 - $50</option>
+                            <option value="50-100">$50 - $100</option>
+                            <option value="100+">$100+</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">Sort by:</label>
+                        <select class="form-select filter-select">
+                            <option value="newest">Newest First</option>
+                            <option value="price-low">Price: Low to High</option>
+                            <option value="price-high">Price: High to Low</option>
+                            <option value="popular">Most Popular</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="products-section">
+    <div class="container">
+        @if (Model.Any())
+        {
+            <div class="row">
+                @foreach (var item in Model)
+                {
+                    <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                        <a asp-action="Details" asp-route-id="@item.Id" class="product-card-link">
+                            <div class="product-card">
+                                <div class="product-image-container">
+                                    @if (item.Images != null && item.Images.Any())
+                                    {
+                                        <img src="@item.Images.First().ImagePath" alt="@item.Title" class="product-image" />
+                                        @if (item.Images.Count > 1)
+                                        {
+                                            <div class="image-count">
+                                                <i class="fas fa-images"></i> +@(item.Images.Count - 1)
+                                            </div>
+                                        }
+                                    }
+                                    else if (!string.IsNullOrEmpty(item.ImagePath))
+                                    {
+                                        <img src="@item.ImagePath" alt="@item.Title" class="product-image" />
+                                    }
+                                    else
+                                    {
+                                        <div class="product-image-placeholder">
+                                            <i class="fas fa-tshirt"></i>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="product-info">
+                                    <div class="product-category">@item.Category?.Name</div>
+                                    <h3 class="product-title">@item.Title</h3>
+                                    <p class="product-description">@(item.Description?.Length > 50 ? item.Description.Substring(0, 50) + "..." : item.Description)</p>
+                                    <div class="product-price">$@item.Price.ToString("F2")</div>
+                                    <div class="product-meta">
+                                        <span class="product-date">
+                                            <i class="fas fa-calendar"></i> @item.CreatedAt.ToString("MMM dd")
+                                        </span>
+                                        <span class="product-views">
+                                            <i class="fas fa-eye"></i> @(new Random().Next(10, 200))
+                                        </span>
+                                    </div>
+                                    <div class="product-actions-bottom">
+                                        @{
+                                            bool canEdit = currentUser != null && item.UserId == currentUser.Id;
+                                        }
+
+                                        @if (canEdit)
+                                        {
+                                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-outline-secondary btn-sm" onclick="event.preventDefault(); event.stopPropagation(); window.location.href='@Url.Action("Edit", new { id = item.Id })';">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+                                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger btn-sm" onclick="event.preventDefault(); event.stopPropagation(); window.location.href='@Url.Action("Delete", new { id = item.Id })';">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-tshirt"></i>
+                </div>
+                <h3>No Products Found</h3>
+                <p>Be the first to list a product for sale!</p>
+                <a asp-action="Create" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus"></i> Start Selling
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+@if (Model.Any())
+{
+    <div class="pagination-section">
+        <div class="container">
+            <nav aria-label="Products pagination">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1">Previous</a>
+                    </li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+}

@@ -1,0 +1,324 @@
+﻿@{
+    ViewData["Title"] = "Swapit - Buy & Sell Fashion";
+}
+
+<style>
+    /* Replace turquoise/teal colors with kaki (#2e6417) for Home page */
+    .hero-section {
+        background: linear-gradient(135deg, #2e6417 0%, #1e4d0f 100%) !important;
+    }
+    
+    .hero-buttons .btn-primary {
+        color: #2e6417 !important;
+    }
+    
+    .hero-buttons .btn-primary:hover {
+        color: #2e6417 !important;
+    }
+    
+    .step-icon {
+        background: linear-gradient(135deg, #2e6417, #1e4d0f) !important;
+    }
+    
+    .category-overlay {
+        background: rgba(46, 100, 23, 0.8) !important;
+    }
+    
+    .trust-icon {
+        background: linear-gradient(135deg, #2e6417, #1e4d0f) !important;
+    }
+    
+    .cta-section {
+        background: linear-gradient(135deg, #2e6417 0%, #1e4d0f 100%) !important;
+    }
+    
+    .btn-cta {
+        color: #2e6417 !important;
+    }
+    
+    .btn-cta:hover {
+        color: #2e6417 !important;
+    }
+    
+    .item-badge-new {
+        background: #2e6417 !important;
+    }
+</style>
+
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 hero-content">
+                <h1 class="hero-title">Ready to declutter?</h1>
+                <p class="hero-subtitle">Sell clothes you don't need to someone who'll love them</p>
+                <div class="hero-buttons">
+                    <a asp-controller="Products" asp-action="Create" class="btn btn-primary btn-lg">
+                        <i class="fas fa-plus-circle"></i> Start Selling
+                    </a>
+                    <a asp-controller="Products" asp-action="Index" class="btn btn-outline btn-lg">
+                        <i class="fas fa-search"></i> Browse Items
+                    </a>
+                </div>
+                <div class="hero-stats mt-4">
+                    <div class="stat-badge">
+                        <i class="fas fa-users"></i>
+                        <span><strong>50K+</strong> Members</span>
+                    </div>
+                    <div class="stat-badge">
+                        <i class="fas fa-box"></i>
+                        <span><strong>100K+</strong> Items</span>
+                    </div>
+                    <div class="stat-badge">
+                        <i class="fas fa-star"></i>
+                        <span><strong>4.8</strong> Rating</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 hero-image">
+                <div class="hero-illustration">
+                    <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&q=80"
+                         alt="Fashion" class="img-fluid rounded-3 shadow-lg" />
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="how-it-works-section py-5 bg-light">
+    <div class="container">
+        <h2 class="section-title text-center mb-5">How Swapit works</h2>
+        <div class="row g-4">
+
+            <div class="col-md-4">
+                <div class="work-step text-center">
+                    <div class="step-icon">
+                        <img src="~/images/homeicon/step1.png" alt="List your item" class="img-fluid rounded-circle" style="width:80px; height:80px; object-fit:cover;">
+                    </div>
+                    <h4 class="step-title mt-3">1. List your item</h4>
+                    <p class="step-description">Take photos, add a description and set your price. Tap 'Upload' and your item will be online in seconds.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="work-step text-center">
+                    <div class="step-icon">
+                        <img src="~/images/homeicon/step2.png" alt="Sell it" class="img-fluid rounded-circle" style="width:80px; height:80px; object-fit:cover;">
+                    </div>
+                    <h4 class="step-title mt-3">2. Sell it</h4>
+                    <p class="step-description">We'll notify you when you make a sale. Perfect! Now, box up your item and ship it.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="work-step text-center">
+                    <div class="step-icon">
+                        <img src="~/images/homeicon/step3.png" alt="Get paid" class="img-fluid rounded-circle" style="width:80px; height:80px; object-fit:cover;">
+                    </div>
+                    <h4 class="step-title mt-3">3. Get paid</h4>
+                    <p class="step-description">Once your buyer confirms everything's OK, we'll transfer your money straight away.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- Categories Section -->
+<section class="categories-section py-5">
+    <div class="container">
+        <h2 class="section-title text-center mb-5">Shop by Category</h2>
+        <div class="row g-4">
+            <div class="col-6 col-md-3">
+                <a asp-controller="Products" asp-action="Index" asp-route-category="Clothing" class="category-card-link">
+                    <div class="category-card-modern">
+                        <div class="category-image">
+                            <img src="https://res.cloudinary.com/jerrick/image/upload/d_642250b563292b35f27461a7.png,f_jpg,fl_progressive,q_auto,w_1024/66e65355039a32001d9c1280.jpg"
+                                 alt="Women" class="img-fluid" />
+                            <div class="category-overlay">
+                                <i class="fas fa-female"></i>
+                            </div>
+                        </div>
+                        <h4 class="category-name">Clothing</h4>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a asp-controller="Products" asp-action="Index" asp-route-category="Footwear" class="category-card-link">
+                    <div class="category-card-modern">
+                        <div class="category-image">
+                            <img src="https://images.unsplash.com/photo-1735527672954-e3114d889b0d?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Zm9vdHdlYXIlMjBjYXRlZ29yeXxlbnwwfHwwfHx8MA%3D%3D"
+                                 alt="Footwear" class="img-fluid" />
+                            <div class="category-overlay">
+                                <i class="fas fa-male"></i>
+                            </div>
+                        </div>
+                        <h4 class="category-name">Footwear</h4>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a asp-controller="Products" asp-action="Index" asp-route-category="Brands" class="category-card-link">
+                    <div class="category-card-modern">
+                        <div class="category-image">
+                            <img src="https://images.unsplash.com/photo-1614231125961-38323d6c485b?q=80&w=435&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                                 alt="Kids" class="img-fluid" />
+                            <div class="category-overlay">
+                                <i class="fas fa-child"></i>
+                            </div>
+                        </div>
+                        <h4 class="category-name">Brands</h4>
+                    </div>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a asp-controller="Products" asp-action="Index" asp-route-category="Accessories" class="category-card-link">
+                    <div class="category-card-modern">
+                        <div class="category-image">
+                            <img src="https://images.unsplash.com/3/www.madebyvadim.com.jpg?q=80&w=882&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                                 alt="Accessories" class="img-fluid" />
+                            <div class="category-overlay">
+                                <i class="fas fa-gem"></i>
+                            </div>
+                        </div>
+                        <h4 class="category-name">Accessories</h4>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Items Section -->
+<section class="featured-section py-5 bg-light">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="section-title mb-0">Trending Now</h2>
+            <a asp-controller="Products" asp-action="Index" class="btn btn-link text-decoration-none">
+                View all <i class="fas fa-arrow-right ms-1"></i>
+            </a>
+        </div>
+        <div class="row g-4">
+            <div class="col-6 col-md-4 col-lg-3">
+                <div class="trending-item-card">
+                    <div class="item-image-wrapper">
+                        <img src="https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&q=80"
+                             alt="Item" class="img-fluid" />
+                        <button class="btn-favorite">
+                            <i class="far fa-heart"></i>
+                        </button>
+                        <span class="item-badge-new">New</span>
+                    </div>
+                    <div class="item-details">
+                        <p class="item-price">$45.00</p>
+                        <h5 class="item-title-small">Vintage Denim Jacket</h5>
+                        <p class="item-size">Size M</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-3">
+                <div class="trending-item-card">
+                    <div class="item-image-wrapper">
+                        <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&q=80"
+                             alt="Item" class="img-fluid" />
+                        <button class="btn-favorite">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+                    <div class="item-details">
+                        <p class="item-price">$120.00</p>
+                        <h5 class="item-title-small">Designer Sneakers</h5>
+                        <p class="item-size">Size 42</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-3">
+                <div class="trending-item-card">
+                    <div class="item-image-wrapper">
+                        <img src="https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=400&q=80"
+                             alt="Item" class="img-fluid" />
+                        <button class="btn-favorite">
+                            <i class="far fa-heart"></i>
+                        </button>
+                        <span class="item-badge-sale">Sale</span>
+                    </div>
+                    <div class="item-details">
+                        <p class="item-price">$25.00</p>
+                        <h5 class="item-title-small">Summer Dress</h5>
+                        <p class="item-size">Size S</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-lg-3">
+                <div class="trending-item-card">
+                    <div class="item-image-wrapper">
+                        <img src="https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=400&q=80"
+                             alt="Item" class="img-fluid" />
+                        <button class="btn-favorite">
+                            <i class="far fa-heart"></i>
+                        </button>
+                    </div>
+                    <div class="item-details">
+                        <p class="item-price">$85.00</p>
+                        <h5 class="item-title-small">Leather Handbag</h5>
+                        <p class="item-size">Excellent condition</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="trust-section py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <h2 class="trust-title">Why choose Swapit?</h2>
+                <div class="trust-features">
+                    <div class="trust-feature">
+                        <div class="trust-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="trust-content">
+                            <h5>Buyer Protection</h5>
+                            <p>Get your money back if the item doesn't arrive or isn't as described</p>
+                        </div>
+                    </div>
+                    <div class="trust-feature">
+                        <div class="trust-icon">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                        <div class="trust-content">
+                            <h5>Sustainable Shopping</h5>
+                            <p>Give fashion a second life and reduce your environmental impact</p>
+                        </div>
+                    </div>
+                    <div class="trust-feature">
+                        <div class="trust-icon">
+                            <i class="fas fa-tags"></i>
+                        </div>
+                        <div class="trust-content">
+                            <h5>Great Deals</h5>
+                            <p>Find quality items at prices up to 80% off retail</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80"
+                     alt="Shopping" class="img-fluid rounded-3 shadow-lg" />
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section py-5">
+    <div class="container text-center">
+        <div class="cta-content">
+            <h2 class="cta-title">Ready to start selling?</h2>
+            <p class="cta-subtitle">Join thousands of sellers who are making money from their unused clothes.</p>
+            <a asp-controller="Products" asp-action="Create" class="btn btn-cta btn-lg">
+                <i class="fas fa-rocket"></i> Get Started Today
+            </a>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,61 @@
+## =========================
+## .NET / ASP.NET Core
+## =========================
+bin/
+obj/
+
+## Build results
+[Bb]uild/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+
+## =========================
+## Visual Studio
+## =========================
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Rider / VS Code
+.idea/
+.vscode/
+
+## =========================
+## Logs
+## =========================
+*.log
+
+## =========================
+## App settings
+## =========================
+appsettings.Development.json
+appsettings.Local.json
+
+## =========================
+## Database
+## =========================
+*.mdf
+*.ldf
+
+## =========================
+## Frontend / Node
+## =========================
+node_modules/
+dist/
+npm-debug.log*
+
+## =========================
+## Uploads
+## =========================
+wwwroot/images/uploads/
+wwwroot/images/profiles/
+
+## =========================
+## OS
+## =========================
+.DS_Store
+Thumbs.db

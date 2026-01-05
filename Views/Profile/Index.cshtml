@@ -1,0 +1,66 @@
+﻿@model vinted2.ViewModels.ProfileViewModel
+
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<h2>Profile</h2>
+
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-success">@ViewBag.Message</div>
+}
+
+<form asp-action="Index" method="post" enctype="multipart/form-data">
+    <div class="mb-3 text-center">
+        <img id="avatarPreview" src="@(Model.AvatarPath ?? "/images/profiles/default-avatar.png")"
+             class="rounded-circle" style="width:100px; height:100px; object-fit:cover;" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="AvatarFile" class="form-label">Change Avatar</label>
+        <input asp-for="AvatarFile" type="file" class="form-control" accept="image/*" onchange="previewAvatar(event)" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="DisplayName" class="form-label"></label>
+        <input asp-for="DisplayName" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Email" class="form-label"></label>
+        <input asp-for="Email" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Password" class="form-label"></label>
+        <input asp-for="Password" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Update Profile</button>
+</form>
+
+<div class="mt-4 d-flex gap-2">
+    <a href="@Url.Action("MyOrders", "Orders")" class="btn btn-outline-primary">
+        <i class="fas fa-shopping-bag"></i> View My Orders
+    </a>
+    <a href="@Url.Action("ManageOrders", "Orders")" class="btn btn-outline-success">
+        <i class="fas fa-tasks"></i> Manage Orders
+    </a>
+</div>
+
+@section Scripts {
+    <script>
+        function previewAvatar(event) {
+            const input = event.target;
+            const preview = document.getElementById('avatarPreview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+}

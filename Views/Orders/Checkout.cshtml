@@ -1,0 +1,46 @@
+﻿@model vinted2.ViewModels.CheckoutViewModel
+
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<div class="container py-5">
+    <h2 class="mb-4">Checkout</h2>
+
+    <form asp-action="PlaceOrder" method="post">
+        <input type="hidden" asp-for="ProductId" />
+
+        <div class="mb-3">
+            <label class="form-label">Full Name</label>
+            <input asp-for="FullName" class="form-control" required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Address</label>
+            <input asp-for="Address" class="form-control" required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">City</label>
+            <input asp-for="City" class="form-control" required />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Phone</label>
+            <input asp-for="Phone" class="form-control" required />
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label">Delivery Method</label>
+            <select asp-for="DeliveryMethod" class="form-select" required>
+                <option value="">Select delivery</option>
+                <option value="Sameday">Sameday</option>
+                <option value="Cargus">Cargus</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-success btn-lg">
+            <i class="fas fa-check"></i> Place Order
+        </button>
+    </form>
+</div>
